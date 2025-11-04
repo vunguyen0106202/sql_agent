@@ -1,0 +1,9 @@
+# Bỏ qua file .env
+.env
+.env.local
+.env.development
+.env.production
+
+# Bỏ qua thư mục môi trường ảo hoặc node_modules (nếu có)
+node_modules/
+venv/
