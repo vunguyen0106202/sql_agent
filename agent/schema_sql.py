@@ -1,11 +1,12 @@
 import pymssql
 import os
 import dotenv
-from state import AgentState
+from State import AgentState
 dotenv.load_dotenv()
 class SCHEMASQL:
     def __init__(self):
-        pass
+        self.AgentState=AgentState()
+
     def get_db_connection(self):
         """Tạo kết nối đến SQL Server"""
         server = os.getenv("DB_SERVER")
@@ -28,7 +29,6 @@ class SCHEMASQL:
     def get_schema(self, state: AgentState) -> AgentState:
         """Lấy thông tin schema của bảng được chỉ định"""
         try:
-            # Lấy table_name từ state (được gửi từ frontend)
             table_name = state.get("table_name")
             
             if not table_name:
@@ -36,9 +36,6 @@ class SCHEMASQL:
             
             conn = self.get_db_connection()
             cursor = conn.cursor()
-            
-            # Lấy thông tin cột từ INFORMATION_SCHEMA
-            # Sử dụng parameterized query để tránh SQL injection
             cursor.execute("""
                 SELECT 
                     COLUMN_NAME,
@@ -65,7 +62,7 @@ class SCHEMASQL:
             
             # Lấy dữ liệu mẫu
             # Sử dụng QUOTENAME để escape table name an toàn
-            query = f"SELECT TOP 3 * FROM {table_name}"
+            query = f"SELECT TOP 1 * FROM {table_name}"
             cursor.execute(query)
             samples = cursor.fetchall()
             
@@ -79,5 +76,4 @@ class SCHEMASQL:
         except Exception as e:
             state["error"] = f"Lỗi khi lấy schema: {str(e)}"
             state["schema_info"] = ""
-        
         return state
