@@ -61,8 +61,7 @@ class SCHEMASQL:
                 schema_info += f"  - {col_name} ({data_type}{max_length}) {nullable}\n"
             
             # Lấy dữ liệu mẫu
-            # Sử dụng QUOTENAME để escape table name an toàn
-            query = f"SELECT TOP 1 * FROM {table_name}"
+            query = f"SELECT TOP 3 * FROM {table_name}"
             cursor.execute(query)
             samples = cursor.fetchall()
             

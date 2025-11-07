@@ -10,7 +10,6 @@ class SQLAGENT:
     def __init__(self):
         self.db_manager = SCHEMASQL()
         self.llm_manager = LLMManager()
-        self.AgentState=AgentState()
 
 
     def generate_sql(self,state: AgentState) -> AgentState:
@@ -89,4 +88,34 @@ class SQLAGENT:
             state["error"] = f"Lỗi khi thực thi SQL: {str(e)}"
             state["query_result"] = ""
     
+        return state
+    
+    def generate_answer(self,state: AgentState) -> AgentState:
+        """Sử dụng LLM để tạo câu trả lời tự nhiên từ kết quả"""
+        if state.get("error"):
+            state["final_answer"] = f"{state['error']}"
+            return state
+        
+        try:
+            system_prompt = """Bạn là trợ lý phân tích dữ liệu. Hãy tóm tắt kết quả truy vấn một cách dễ hiểu và thân thiện."""
+            
+            messages = [
+                SystemMessage(content=system_prompt),
+                HumanMessage(content=f"""Người dùng hỏi: {state['user_input']}
+
+                SQL đã thực thi: {state['sql_query']}
+
+                Kết quả:
+                {state['query_result']}
+                
+                Hãy trả lời câu hỏi của người dùng dựa trên kết quả trên.
+                Câu trả lời đúng với yêu cầu và đầu câu cần tổng hợp số lượng truy vấn lấy đc""")
+                        ]
+            
+            response = self.llm_manager.invoke(messages)
+            state["final_answer"] = response.strip()
+            
+        except Exception as e:
+            state["final_answer"] = f"Lỗi khi tạo câu trả lời: {str(e)}"
+        
         return state
